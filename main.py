@@ -90,10 +90,15 @@ def fundamental_analysis(symbol, current_date, influx_frendly_data):
         influx_frendly_data(
             os.environ.get('Fundamental_News_Table'),
             current_date,
-            {
-                "Title": news_item['title'],
-                "Source": news_item['source']
-            },
+            merge_four_dicts(
+                {
+                    "Title": news_item['title'],
+                    "Source": news_item['source']
+                },
+                perform_topic_extractor([news_item['title']]),
+                get_entities(news_item['title']),
+                get_sentiment(news_item['title'])
+            ),
             {
                 "symbol": symbol,
                 "guid": news_item['guid']
@@ -191,5 +196,6 @@ def process_row(row):
     execute_stock(symbol)
 
 if __name__ == '__main__':
-    df = pd.read_csv('stocks-list.csv')
+    df = pd.DataFrame.from_dict([{ "Symbol": "AAPL" }])
+    #df = pd.read_csv('stocks-list.csv')
     df.apply(process_row, axis=1)
