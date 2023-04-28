@@ -92,7 +92,7 @@ def fundamental_analysis(symbol, current_date, influx_frendly_data):
             current_date,
             merge_four_dicts(
                 {
-                    "Title": news_item['title'],
+                    "title": news_item['title'],
                     "Source": news_item['source']
                 },
                 perform_topic_extractor([news_item['title']]),
