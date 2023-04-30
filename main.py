@@ -129,7 +129,7 @@ def technical_analysis(symbol, influx_frendly_data, api_key):
 
     technical_data = [
         influx_frendly_data(
-            {os.environ.get('Technical_Analysis_Table')},
+            os.environ.get('Technical_Analysis_Table'),
             date,
             {
                 "open": data["Time Series (Daily)"][date]['1. open'],
@@ -154,8 +154,8 @@ def technical_analysis(symbol, influx_frendly_data, api_key):
         "symbol": symbol
     } for date in data["Time Series (Daily)"]]
 
-    technical_data = technical_data[:20]
-    sqlite_technical_data = sqlite_technical_data[:20]
+    technical_data = technical_data
+    sqlite_technical_data = sqlite_technical_data
     return technical_data, sqlite_technical_data
 
 def insert_into_influx(full_list):
@@ -186,9 +186,9 @@ def execute_stock(symbol):
     news_list, sqlite_news_list = fundamental_analysis(symbol, current_date, influx_frendly_data)
     technical_data, sqlite_technical_data = technical_analysis(symbol, influx_frendly_data, api_key)
     full_list = sum([financial_strength, news_list, technical_data[:30]], [])
-    insert_into_sqlite(pd.DataFrame.from_dict(sqlite_financial_strength), os.environ.get('Fin_Stren_Table'), engine)
-    insert_into_sqlite(pd.DataFrame.from_dict(sqlite_news_list), os.environ.get('FUNDAMENTAL_NEWS_TABLE'), engine)
-    insert_into_sqlite(pd.DataFrame.from_dict(sqlite_technical_data), os.environ.get('Technical_Analysis_Table'), engine)
+    #insert_into_sqlite(pd.DataFrame.from_dict(sqlite_financial_strength), os.environ.get('Fin_Stren_Table'), engine)
+    #insert_into_sqlite(pd.DataFrame.from_dict(sqlite_news_list), os.environ.get('FUNDAMENTAL_NEWS_TABLE'), engine)
+    #insert_into_sqlite(pd.DataFrame.from_dict(sqlite_technical_data), os.environ.get('Technical_Analysis_Table'), engine)
     insert_into_influx(full_list)
 
 def process_row(row):
