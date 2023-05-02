@@ -35,11 +35,11 @@ def get_entities(text):
 
         # Make the entities, organizations, gpe, locations and others as a dictionary
         entities_dict = {
-            "entities": entities_csv,
-            "organizations": organizations_csv,
-            "gpe": gpe_csv,
-            "locations": locations_csv,
-            "others": others_csv
+            "Entities": entities_csv,
+            "Organizations": organizations_csv,
+            "Gpe": gpe_csv,
+            "Locations": locations_csv,
+            "Others": others_csv
         }
         return entities_dict
     except Exception as e:

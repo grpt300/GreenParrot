@@ -76,44 +76,61 @@ def fundamental_analysis(symbol, current_date, influx_frendly_data):
         z.update(a)
         return z
 
+    #Get the end time as the current date
+    #Convert currentdate string to datetime object
+    current_date_value = pd.to_datetime(current_date)
+
+    end_time = current_date_value
+    #Get the start time as the current date - 30 days
+    start_time = (current_date_value - pd.DateOffset(days=30))
     url = os.environ.get('Fundamental_News_Provider')
-    querystring = {"category": symbol}
-    headers = {
-        "X-RapidAPI-Key": os.environ.get('Fundamental_News_Key'),
-        "X-RapidAPI-Host": os.environ.get('Fundamental_News_Host')
-    }
+    cur_date = end_time
 
-    response = requests.get(url, headers=headers, params=querystring)
-    data = json.loads(response.text)
+    return_news_list = []
+    while cur_date >= start_time:
+        querystring = {
+            "category": symbol,
+            "region": "US",
+            "start_time": cur_date.strftime("%Y-%m-%d"),
+            "end_time": cur_date.strftime("%Y-%m-%d"),
+            "size": "50"
+        }
+        headers = {
+            "X-RapidAPI-Key": os.environ.get('Fundamental_News_Key'),
+            "X-RapidAPI-Host": os.environ.get('Fundamental_News_Host')
+        }
 
-    news_list = [
-        influx_frendly_data(
-            os.environ.get('Fundamental_News_Table'),
-            current_date,
-            {
-                "Title": news_item['title'],
-                "Source": news_item['source']
-            },
-            {
-                "symbol": symbol,
-                "guid": news_item['guid']
-            }
-        ) for news_item in data
-    ]
+        response = requests.get(url, headers=headers, params=querystring)
+        data = json.loads(response.text)
 
-    sqlite_news_list = [merge_four_dicts(
-        {
-            "date_value": current_date,
-            "Title": news_item['title'],
-            "Source": news_item['source'],
-            "symbol": symbol,
-            "guid": news_item['guid']
-        },
-        perform_topic_extractor([news_item['title']]),
-        get_entities(news_item['title']),
-        get_sentiment(news_item['title'])) for news_item in data]
+        news_list = [
+            influx_frendly_data(
+                os.environ.get('FUNDAMENTAL_NEWS_TABLE'),
+                cur_date.strftime("%Y-%m-%d"),
+                merge_four_dicts(
+                    {
+                        "title": news_item['title'],
+                        "Source": news_item['source']
+                    },
+                    perform_topic_extractor([news_item['title']]),
+                    get_entities(news_item['title']),
+                    get_sentiment(news_item['title'])
+                ),
+                {
+                    "symbol": symbol,
+                    "guid": news_item['guid']
+                }
+            ) for news_item in data
+        ]
 
-    return news_list, sqlite_news_list
+        sqlite_news_list = []
+
+        return_news_list = return_news_list + news_list
+
+        cur_date = cur_date - pd.DateOffset(days=1)
+
+
+    return return_news_list, sqlite_news_list
 
 def technical_analysis(symbol, influx_frendly_data, api_key):
     function = os.environ.get('Technical_Analysis_Function')
@@ -124,7 +141,7 @@ def technical_analysis(symbol, influx_frendly_data, api_key):
 
     technical_data = [
         influx_frendly_data(
-            {os.environ.get('Technical_Analysis_Table')},
+            os.environ.get('Technical_Analysis_Table'),
             date,
             {
                 "open": data["Time Series (Daily)"][date]['1. open'],
@@ -149,19 +166,17 @@ def technical_analysis(symbol, influx_frendly_data, api_key):
         "symbol": symbol
     } for date in data["Time Series (Daily)"]]
 
-    technical_data = technical_data[:20]
-    sqlite_technical_data = sqlite_technical_data[:20]
     return technical_data, sqlite_technical_data
 
 def insert_into_influx(full_list):
-    token_val = os.environ.get('Influx_Token_Value')
-    client = influxdb_client.InfluxDBClient(url=os.environ.get('Influx_DB_URL'), token=token_val,
-                                            org=os.environ.get('Influx_Org_Name'), verify_ssl=False)
+    token_val = os.environ.get('INFLUX_TOKEN_VALUE')
+    client = influxdb_client.InfluxDBClient(url=os.environ.get('INFLUX_DB_URL'), token=token_val,
+                                            org=os.environ.get('INFLUX_ORG_NAME'), verify_ssl=False)
     write_api = client.write_api(write_options=SYNCHRONOUS)
     batch_size = 1000
     for i in range(0, len(full_list), batch_size):
         batch_data = full_list[i:i + batch_size]
-        write_api.write(bucket=os.environ.get('Influx_Bucket_Name'), record=batch_data)
+        write_api.write(bucket=os.environ.get('INFLUX_BUCKET_NAME'), record=batch_data)
     client.close()
 
 
@@ -180,10 +195,10 @@ def execute_stock(symbol):
     financial_strength, sqlite_financial_strength = financial_strength_retreival(symbol, influx_frendly_data, api_key, function, current_date)
     news_list, sqlite_news_list = fundamental_analysis(symbol, current_date, influx_frendly_data)
     technical_data, sqlite_technical_data = technical_analysis(symbol, influx_frendly_data, api_key)
-    full_list = sum([financial_strength, news_list, technical_data[:30]], [])
-    insert_into_sqlite(pd.DataFrame.from_dict(sqlite_financial_strength), os.environ.get('Fin_Stren_Table'), engine)
-    insert_into_sqlite(pd.DataFrame.from_dict(sqlite_news_list), os.environ.get('Fundamental_News_Table'), engine)
-    insert_into_sqlite(pd.DataFrame.from_dict(sqlite_technical_data), os.environ.get('Technical_Analysis_Table'), engine)
+    full_list = sum([financial_strength, news_list, technical_data[:60]], [])
+    #insert_into_sqlite(pd.DataFrame.from_dict(sqlite_financial_strength), os.environ.get('Fin_Stren_Table'), engine)
+    #insert_into_sqlite(pd.DataFrame.from_dict(sqlite_news_list), os.environ.get('FUNDAMENTAL_NEWS_TABLE'), engine)
+    #insert_into_sqlite(pd.DataFrame.from_dict(sqlite_technical_data), os.environ.get('Technical_Analysis_Table'), engine)
     insert_into_influx(full_list)
 
 def process_row(row):
@@ -191,5 +206,6 @@ def process_row(row):
     execute_stock(symbol)
 
 if __name__ == '__main__':
-    df = pd.read_csv('stocks-list.csv')
+    #df = pd.read_csv('stocks-list.csv')
+    df = pd.DataFrame.from_dict([{"Symbol": "AAPL"}])
     df.apply(process_row, axis=1)

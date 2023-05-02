@@ -10,7 +10,7 @@ def get_sentiment(text):
 
         # Convert sentiment_scores to a dictionary with key as "sentiment"
         sentiment_dict = {
-            "sentiment": sentiment_scores['compound']
+            "Sentiment": sentiment_scores['compound']
         }
         return sentiment_dict
     except Exception as e:

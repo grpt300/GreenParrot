@@ -32,8 +32,8 @@ def perform_topic_extractor(corpus):
 
         # Step 6 : Put both topic_probs_csv and topic_categories_csv in a dictionary
         topic_extractor_dict = {
-            "topic_probs_csv": topic_probs_csv,
-            "topic_categories_csv": topic_categories_csv
+            "Topic_probs_csv": topic_probs_csv,
+            "Topic_categories_csv": topic_categories_csv
         }
 
         return topic_extractor_dict
