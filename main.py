@@ -88,46 +88,50 @@ def fundamental_analysis(symbol, current_date, influx_frendly_data):
 
     return_news_list = []
     while cur_date >= start_time:
-        querystring = {
-            "category": symbol,
-            "region": "US",
-            "start_time": cur_date.strftime("%Y-%m-%d"),
-            "end_time": cur_date.strftime("%Y-%m-%d"),
-            "size": "50"
-        }
-        headers = {
-            "X-RapidAPI-Key": os.environ.get('Fundamental_News_Key'),
-            "X-RapidAPI-Host": os.environ.get('Fundamental_News_Host')
-        }
+        try:
+            querystring = {
+                "category": symbol,
+                "region": "US",
+                "start_time": cur_date.strftime("%Y-%m-%d"),
+                "end_time": cur_date.strftime("%Y-%m-%d"),
+                "size": "50"
+            }
+            headers = {
+                "X-RapidAPI-Key": os.environ.get('Fundamental_News_Key'),
+                "X-RapidAPI-Host": os.environ.get('Fundamental_News_Host')
+            }
 
-        response = requests.get(url, headers=headers, params=querystring)
-        data = json.loads(response.text)
+            response = requests.get(url, headers=headers, params=querystring)
+            data = json.loads(response.text)
 
-        news_list = [
-            influx_frendly_data(
-                os.environ.get('FUNDAMENTAL_NEWS_TABLE'),
-                cur_date.strftime("%Y-%m-%d"),
-                merge_four_dicts(
+            news_list = [
+                influx_frendly_data(
+                    os.environ.get('FUNDAMENTAL_NEWS_TABLE'),
+                    cur_date.strftime("%Y-%m-%d"),
+                    merge_four_dicts(
+                        {
+                            "title": news_item['title'],
+                            "Source": news_item['source']
+                        },
+                        perform_topic_extractor([news_item['title']]),
+                        get_entities(news_item['title']),
+                        get_sentiment(news_item['title'])
+                    ),
                     {
-                        "title": news_item['title'],
-                        "Source": news_item['source']
-                    },
-                    perform_topic_extractor([news_item['title']]),
-                    get_entities(news_item['title']),
-                    get_sentiment(news_item['title'])
-                ),
-                {
-                    "symbol": symbol,
-                    "guid": news_item['guid']
-                }
-            ) for news_item in data
-        ]
+                        "symbol": symbol,
+                        "guid": news_item['guid']
+                    }
+                ) for news_item in data
+            ]
 
-        sqlite_news_list = []
+            sqlite_news_list = []
 
-        return_news_list = return_news_list + news_list
+            return_news_list = return_news_list + news_list
 
-        cur_date = cur_date - pd.DateOffset(days=1)
+            cur_date = cur_date - pd.DateOffset(days=1)
+        except:
+            cur_date = cur_date - pd.DateOffset(days=1)
+            continue
 
 
     return return_news_list, sqlite_news_list
