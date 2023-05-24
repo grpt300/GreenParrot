@@ -4,3 +4,5 @@ flightsql-dbapi==0.2.1
 influxdb==5.3.1
 influxdb-client==1.36.1
 pandas==1.5.0
+bard
+openai
