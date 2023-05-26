@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 import pandas as pd
 from POC.topic_extractor import perform_topic_extractor
 from POC.ner_extractor import get_entities
-from POC.opinion_mining import get_sentiment
+from module.chat_gpt_sentiment_analysis import get_sentiment as get_sentiment_gpt
 
 def sqlite_db_connection():
     if not os.path.exists('stocks.db'):
@@ -82,7 +82,7 @@ def fundamental_analysis(symbol, current_date, influx_frendly_data):
 
     end_time = current_date_value
     #Get the start time as the current date - 30 days
-    start_time = (current_date_value - pd.DateOffset(days=30))
+    start_time = (current_date_value - pd.DateOffset(days=10))
     url = os.environ.get('Fundamental_News_Provider')
     cur_date = end_time
 
@@ -115,7 +115,7 @@ def fundamental_analysis(symbol, current_date, influx_frendly_data):
                         },
                         perform_topic_extractor([news_item['title']]),
                         get_entities(news_item['title']),
-                        get_sentiment(news_item['title'])
+                        get_sentiment_gpt(news_item['title'])
                     ),
                     {
                         "symbol": symbol,
@@ -129,7 +129,8 @@ def fundamental_analysis(symbol, current_date, influx_frendly_data):
             return_news_list = return_news_list + news_list
 
             cur_date = cur_date - pd.DateOffset(days=1)
-        except:
+        except Exception as e:
+            print(e)
             cur_date = cur_date - pd.DateOffset(days=1)
             continue
 
