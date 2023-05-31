@@ -82,7 +82,7 @@ def fundamental_analysis(symbol, current_date, influx_frendly_data):
 
     end_time = current_date_value
     #Get the start time as the current date - 30 days
-    start_time = (current_date_value - pd.DateOffset(days=10))
+    start_time = (current_date_value - pd.DateOffset(days=2))
     url = os.environ.get('Fundamental_News_Provider')
     cur_date = end_time
 
