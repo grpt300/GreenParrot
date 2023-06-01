@@ -61,8 +61,8 @@ def get_quarterly_earnings_data(df_row):
     df_data = quarterly_earnings_df(df_row['Symbol'])
     full_list = []
     for single_index, single_row in df_data.iterrows():
-        #Check if the reportedDate is greater than Feb 28th 2023
-        if single_row['reportedDate'] > pd.Timestamp(2023, 2, 28):
+        #Check if the reportedDate is greater than Nov 31st 2022
+        if single_row['reportedDate'] > pd.Timestamp(2022, 11, 30):
             single_data = influx_frendly_data(
                 os.environ.get('Quarterly_Earnings_Table'),
                 single_row['reportedDate'],
