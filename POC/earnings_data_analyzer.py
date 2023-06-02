@@ -32,4 +32,6 @@ if __name__ == "__main__":
         # put all values into all_groups list
         all_groups.extend(group_dict)
     df_result = pd.DataFrame.from_dict(all_groups)
+    # filter df_result to have moving_estimate and moving_reported greater than 0
+    df_result = df_result[(df_result['moving_estimate'] > 0) & (df_result['moving_reported'] > 0)]
     df_result.to_csv("influxdata_2023-06-02T18_44_38Z_4.csv", index=False)
