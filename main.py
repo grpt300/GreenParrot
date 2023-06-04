@@ -87,6 +87,7 @@ def fundamental_analysis(symbol, current_date, influx_frendly_data):
     cur_date = end_time
 
     return_news_list = []
+    sqlite_news_list = []
     while cur_date >= start_time:
         try:
             querystring = {

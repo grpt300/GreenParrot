@@ -55,4 +55,6 @@ def get_sentiment(text):
             "Sentiment": -1.0
         }
     else:
-        return 0
+        return {
+            "Sentiment": 0.0
+        }
