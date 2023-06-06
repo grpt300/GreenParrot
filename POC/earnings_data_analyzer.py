@@ -15,23 +15,28 @@ if __name__ == "__main__":
     #df_1.to_csv("influxdata_2023-06-02T18_44_38Z_1.csv", index=False)
     #df_2.to_csv("influxdata_2023-06-02T18_44_38Z_2.csv", index=False)
     # Create a new column in df_1 that will get the difference between reported_Quarterly_EPS and estimated_Quarterly_EPS
-    df_1['reported_actuals_diff'] = df_1['reported_Quarterly_EPS'] - df_1['estimated_Quarterly_EPS']
+    df['reported_actuals_diff'] = df['reported_Quarterly_EPS'] - df['estimated_Quarterly_EPS']
     # filter df_1 to have reported_actuals_diff greater than 0
-    df_1 = df_1[df_1['reported_actuals_diff'] > 0]
+    #df = df[df['reported_actuals_diff'] > 0]
     #df_1.to_csv("influxdata_2023-06-02T18_44_38Z_3.csv", index=False)
     # Loop throguh grouping based on symbol and for each print the symbol and the count of rows
     all_groups = []
-    for symbol, group in df_1.groupby('symbol'):
+    for symbol, group in df.groupby('symbol'):
         print(symbol, len(group))
+        if(symbol == 'AAPL'):
+            print("Inside")
+        group_all_greater = group[group['reported_actuals_diff'] > 0]
+        group_1 = group[(group['estimated_Quarterly_EPS'] > 0) & (group['reported_Quarterly_EPS'] > 0)]
         # sort group by time column
         group = group.sort_values(by=['time'])
         group['moving_estimate'] = group['estimated_Quarterly_EPS'].diff()
         group['moving_reported'] = group['reported_Quarterly_EPS'].diff()
         # Convert group dataframe to dictionary
         group_dict = group.to_dict('records')
-        # put all values into all_groups list
-        all_groups.extend(group_dict)
+        group_filter = group[(group['moving_estimate'] > 0) & (group['moving_reported'] > 0)]
+        if(len(group_1) == len(group) and len(group) > 1 and len(group_all_greater) == len(group) and (len(group_filter) + 1 == len(group))):
+            # put all values into all_groups list
+            all_groups.extend(group_dict)
+
     df_result = pd.DataFrame.from_dict(all_groups)
-    # filter df_result to have moving_estimate and moving_reported greater than 0
-    df_result = df_result[(df_result['moving_estimate'] > 0) & (df_result['moving_reported'] > 0)]
-    df_result.to_csv("influxdata_2023-06-02T18_44_38Z_4.csv", index=False)
+    df_result.to_csv("earning_data_filter.csv", index=False)
