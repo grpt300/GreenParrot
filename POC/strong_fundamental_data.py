@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 import os
+from sqlite_connector import create_sqlite_db, create_sqlite_table, read_sqlite_table, delete_sqlite_table, update_sqlite_table
 
 API_KEY = os.environ.get('Strong_Fundamental_Api_Key')
 
@@ -66,12 +67,34 @@ def get_fundamental_earnings(symbol):
 
     return pd.DataFrame.from_dict(response.json())
 
-# Main function
-if __name__ == '__main__':
-    symbol = 'AAPL'
+#Main function
+def main():
+    # Create SQLite database and connect using sqlalchemy
+    sqlite_connection = create_sqlite_db()
+    symbol = 'Wns'
 
     fundamental_news = get_fundamental_news(symbol)
     fundamental_recommendations = get_fundamental_recommendation(symbol)
     fundamental_earnings = get_fundamental_earnings(symbol)
 
+    # Create a table in SQLite database
+    create_sqlite_table(sqlite_connection, 'fundamental_news', fundamental_news)
+    create_sqlite_table(sqlite_connection, 'fundamental_recommendations', fundamental_recommendations)
+    create_sqlite_table(sqlite_connection, 'fundamental_earnings', fundamental_earnings)
+
+#Main function that returns all the table details as dataframes
+def get_all_data():
+    # Create SQLite database and connect using sqlalchemy
+    sqlite_connection = create_sqlite_db()
+
+    fundamental_news = read_sqlite_table(sqlite_connection, 'fundamental_news')
+    fundamental_recommendations = read_sqlite_table(sqlite_connection, 'fundamental_recommendations')
+    fundamental_earnings = read_sqlite_table(sqlite_connection, 'fundamental_earnings')
+
+    return fundamental_news, fundamental_recommendations, fundamental_earnings
+
+# Main function
+if __name__ == '__main__':
+    # call get all data function
+    fundamental_news, fundamental_recommendations, fundamental_earnings = get_all_data()
     print("Completed Successfully")
