@@ -68,10 +68,10 @@ def get_fundamental_earnings(symbol):
     return pd.DataFrame.from_dict(response.json())
 
 #Main function
-def main():
+def main(symbol):
     # Create SQLite database and connect using sqlalchemy
     sqlite_connection = create_sqlite_db()
-    symbol = 'Wns'
+    #symbol = 'ADI'
 
     fundamental_news = get_fundamental_news(symbol)
     fundamental_recommendations = get_fundamental_recommendation(symbol)
@@ -79,8 +79,10 @@ def main():
 
     # Create a table in SQLite database
     create_sqlite_table(sqlite_connection, 'fundamental_news', fundamental_news)
-    create_sqlite_table(sqlite_connection, 'fundamental_recommendations', fundamental_recommendations)
-    create_sqlite_table(sqlite_connection, 'fundamental_earnings', fundamental_earnings)
+    if(fundamental_recommendations is not None):
+        create_sqlite_table(sqlite_connection, 'fundamental_recommendations', fundamental_recommendations)
+    if(fundamental_earnings is not None):
+        create_sqlite_table(sqlite_connection, 'fundamental_earnings', fundamental_earnings)
 
 #Main function that returns all the table details as dataframes
 def get_all_data():
@@ -95,6 +97,15 @@ def get_all_data():
 
 # Main function
 if __name__ == '__main__':
+    # Get data from stock_list.csv to dataframe and loop through the symbols
+    stock_list = pd.read_csv('stock_list.csv')
+    for symbol in stock_list['Stock_Ticker']:
+        try:
+            main(symbol)
+        except:
+            print(f'Error with {symbol}')
+    """
     # call get all data function
     fundamental_news, fundamental_recommendations, fundamental_earnings = get_all_data()
     print("Completed Successfully")
+    """
