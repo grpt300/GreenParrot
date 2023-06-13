@@ -6,6 +6,7 @@ from scipy.stats import pearsonr
 import requests
 import json
 import os
+from sqlalchemy import create_engine
 
 #Get data from alfa vantage api to dataframe
 def get_data(symbol, api_key):
@@ -47,14 +48,31 @@ def get_pearson_correlation(df, symbol):
 
 #Write main function to get the data and pearson correlation coefficient
 def main():
+    engine = create_engine('sqlite:///./data/stock.db')
     api_key = os.environ.get('Api_Key')
-    symbol = 'GIB'
-    df = get_data(symbol, api_key)
-    correlation_series = get_pearson_correlation(df, symbol)
-    correlation_series = pd.DataFrame(correlation_series)
-    total_data = df.merge(correlation_series, left_index=True, right_index=True)
-    total_data.to_csv('total_data_1year.csv')
-    print(correlation_series)
+    input_symbols = ['CAE.TO', 'JPM', 'TMUS', 'CRWD', 'NOW', 'CEIX', 'OSIS', 'SCI', 'VRNT', 'TNK', 'LNTH', 'DGII', 'CIVB', 'AXON']
+    for symbol in input_symbols:
+        try:
+            df = get_data(symbol, api_key)
+            correlation_series = get_pearson_correlation(df, symbol)
+            correlation_series = pd.DataFrame(correlation_series)
+            total_data = df.merge(correlation_series, left_index=True, right_index=True)
+            total_data = total_data.reset_index()
+            total_data = total_data.rename(columns={'index': 'date_value',
+                                                    '1. open': 'open',
+                                                    '2. high': 'high',
+                                                    '3. low': 'low',
+                                                    '4. close': 'close',
+                                                    '5. volume': 'volume',
+                                                    0: 'correlation'})
+            total_data['symbol'] = symbol
+            #total_data.to_csv('total_data_1year.csv')
+            total_data.to_sql('total_data_1year', con=engine, if_exists='append', index=False)
+            print(correlation_series)
+        except Exception as e:
+            print(e)
+            print('failed to get data for symbol: ' + symbol)
+            continue
 
 if __name__ == '__main__':
     try:
