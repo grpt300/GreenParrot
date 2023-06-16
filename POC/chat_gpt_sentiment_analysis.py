@@ -1,5 +1,6 @@
 import openai
 import os
+from sqlalchemy import create_engine
 
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 
@@ -25,6 +26,9 @@ def analyze_sentiment(text):
     return sentiment
 
 # Example usage
+
+engine = create_engine('sqlite:///./data/stock.db')
+
 text_to_analyze = "'A sign of trouble?' Why more Americans are missing their debt payments."
 sentiment_result = analyze_sentiment(text_to_analyze)
 print(f"The sentiment of the text is: {sentiment_result}")

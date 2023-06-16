@@ -50,7 +50,8 @@ def get_pearson_correlation(df, symbol):
 def main():
     engine = create_engine('sqlite:///./data/stock.db')
     api_key = os.environ.get('Api_Key')
-    input_symbols = ['CAE.TO', 'JPM', 'TMUS', 'CRWD', 'NOW', 'CEIX', 'OSIS', 'SCI', 'VRNT', 'TNK', 'LNTH', 'DGII', 'CIVB', 'AXON']
+    input_symbols = ['NOW', 'CAE.TO', 'JPM', 'TMUS', 'CRWD', 'CEIX', 'OSIS', 'SCI', 'VRNT', 'TNK', 'LNTH', 'DGII', 'CIVB', 'AXON']
+    #input_symbols = ['TMUS']
     for symbol in input_symbols:
         try:
             df = get_data(symbol, api_key)
@@ -73,6 +74,10 @@ def main():
             print(e)
             print('failed to get data for symbol: ' + symbol)
             continue
+        """
+        select strftime('%Y', date_value) AS year, count(1)  from total_data_1year where symbol = 'DGII' and correlation < 0 group by strftime('%Y', date_value) order by date_value desc;
+        select strftime('%Y', date_value) AS year, count(1)  from total_data_1year where symbol = 'DGII' and correlation > 0 group by strftime('%Y', date_value) order by date_value desc;
+        """
 
 if __name__ == '__main__':
     try:

@@ -209,7 +209,9 @@ def process_row(row):
     symbol = row['Symbol']
     execute_stock(symbol)
 
+
 if __name__ == '__main__':
     #df = pd.read_csv('stocks-list.csv')
     df = pd.DataFrame.from_dict([{"Symbol": "AAPL"}])
     df.apply(process_row, axis=1)
+
