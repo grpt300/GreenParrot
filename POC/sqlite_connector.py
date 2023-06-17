@@ -10,9 +10,9 @@ def create_sqlite_db():
     if not os.path.exists('../data'):
         os.makedirs('../data')
     # check if database exists and create if not
-    if not os.path.exists('../data/stock.db'):
-        open('../data/stock.db', 'w').close()
-    engine = create_engine('sqlite:///../data/stock.db', echo=True)
+    if not os.path.exists('../data/stock_1506.db'):
+        open('../data/stock_1506.db', 'w').close()
+    engine = create_engine('sqlite:///../data/stock_1506.db', echo=True)
     # Connect to SQLite database
     sqlite_connection = engine.connect()
     return sqlite_connection
