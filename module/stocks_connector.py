@@ -26,3 +26,17 @@ def get_quarterly_earnings_data(symbol):
     df = df.drop(columns=['estimatedEPS', 'reportedEPS'])
     df = df.set_index('fiscalDateEnding')
     return df
+
+# Get Technical Analysis Data from Alpha Vantage into a Pandas Dataframe
+def get_technical_analysis_data(symbol):
+    stock = symbol
+    function = "TIME_SERIES_DAILY"
+    apikey = os.environ['Api_Key']
+    url = "https://www.alphavantage.co/query"
+    response = rq.get(url, params={"function": function, "symbol": stock, "apikey": apikey})
+    data = response.json()
+    df = pd.DataFrame.from_dict(data['Time Series (Daily)'], orient='index')
+    df = df.rename(columns={'1. open': 'open', '2. high': 'high', '3. low': 'low', '4. close': 'close', '5. volume': 'volume'})
+    df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].apply(pd.to_numeric, errors='coerce')
+    df = df.sort_index(ascending=True)
+    return df

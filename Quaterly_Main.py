@@ -6,6 +6,10 @@ def get_quarterly_earnings_data(symbol):
     df = sc.get_quarterly_earnings_data(symbol)
     return df
 
+def get_tech_analysis_data(symbol):
+    df = sc.get_technical_analysis_data(symbol)
+    return df
+
 # Execute The Method
-df = get_quarterly_earnings_data('AAPL')
+df = get_tech_analysis_data('AAPL')
 print(df)
