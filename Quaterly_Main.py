@@ -27,8 +27,30 @@ def check_positive_surprise(symbol):
     df = df.sort_values(by=['reportedDate'])
     df = df.reset_index(drop=True)
     return is_stock_increasing_trend(df['surprisePercentage'])
+
+# Implement Upper Trend Analysis in every week as the index is daily data as a method
+def get_upper_trend(df):
+    df['upper_trend'] = df['high'].rolling(5).max()
+    df['upper_trend'] = df['upper_trend'].shift(1)
+    df['upper_trend'] = df['upper_trend'].fillna(df['high'])
+    df['upper_trend_increasing'] = df['upper_trend'] > df['upper_trend'].shift(1)
+    df['upper_trend_increasing'] = df['upper_trend_increasing'].fillna(False)
+    bln_upper_trend_increasing = sum(df['upper_trend_increasing']) / len(df) >= 0.8
+    total_incured_percent = sum(df['upper_trend_increasing']) / len(df)
+    return bln_upper_trend_increasing, total_incured_percent, df
+
+
 def execute(symbol):
     bln_positive_surprise = check_positive_surprise(symbol)
-    print(bln_positive_surprise)
+    df_techanalysis_data = get_tech_analysis_data(symbol)
+    # Implement Upper Trend Analysis in every week as the index is daily data
+    bln_upper_trend_increasing, total_incured_percent, df_techanalysis_data = get_upper_trend(df_techanalysis_data)
+    print("Symbol: " + symbol)
+    print("Positive Surprise: " + str(bln_positive_surprise))
+    print("Upper Trend Increasing: " + str(bln_upper_trend_increasing))
+    print("Total Incured Percent: " + str(round(total_incured_percent*100)) + "%")
+    print("Before 100 Days Price: " + str(df_techanalysis_data.head(1)['open'].values[0]))
+    print("Now Price: " + str(df_techanalysis_data.tail(1)['open'].values[0]))
 
-execute('AMZN')
+if __name__ == "__main__":
+    execute('TSLA')
