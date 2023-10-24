@@ -51,6 +51,7 @@ def execute(symbol):
     print("Total Incured Percent: " + str(round(total_incured_percent*100)) + "%")
     print("Before 100 Days Price: " + str(df_techanalysis_data.head(1)['open'].values[0]))
     print("Now Price: " + str(df_techanalysis_data.tail(1)['open'].values[0]))
+    print("successfully executed ...  ")
 
 if __name__ == "__main__":
     execute('TSLA')
