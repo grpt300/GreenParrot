@@ -40,3 +40,14 @@ def get_technical_analysis_data(symbol):
     df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].apply(pd.to_numeric, errors='coerce')
     df = df.sort_index(ascending=True)
     return df
+
+# Get Income Statement Data from Alpha Vantage into a Pandas Dataframe
+def get_income_statement_data(symbol):
+    stock = symbol
+    function = "INCOME_STATEMENT"
+    apikey = os.environ['Api_Key']
+    url = "https://www.alphavantage.co/query"
+    response = rq.get(url, params={"function": function, "symbol": stock, "apikey": apikey})
+    data = response.json()
+    df = pd.DataFrame.from_dict(data['quarterlyReports'])
+    return df
