@@ -23,7 +23,6 @@ def get_quarterly_earnings_data(symbol):
     df['reportedDate'] = pd.to_datetime(df['reportedDate'])
     df[['reported_Quarterly_EPS', 'estimated_Quarterly_EPS', 'surprise', 'surprisePercentage']] = df[
         ['reportedEPS', 'estimatedEPS', 'surprise', 'surprisePercentage']].apply(pd.to_numeric, errors='coerce')
-    df = df.drop(columns=['estimatedEPS', 'reportedEPS'])
     df = df.set_index('fiscalDateEnding')
     return df
 
