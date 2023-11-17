@@ -46,7 +46,7 @@ def execute(symbol):
     df_techanalysis_data = get_tech_analysis_data(symbol)
     # Implement Upper Trend Analysis in every week as the index is daily data
     bln_upper_trend_increasing, total_incured_percent, df_techanalysis_data = get_upper_trend(df_techanalysis_data)
-    df_income_data = sc.get_income_statement_data('AMZN')
+    df_income_data = sc.get_income_statement_data(symbol)
     bln_income_increasing_trend = is_stock_increasing_trend(df_income_data['totalRevenue'])
     print("Symbol: " + symbol)
     print("Positive Surprise: " + str(bln_positive_surprise))
