@@ -15,6 +15,7 @@ def get_tech_analysis_data(symbol):
 def is_stock_increasing_trend(series):
     if(len(series) < 4):
         return False
+    series = series.tail(6)
     sub_series = series.tail(3)
     sub_series = sub_series.reset_index(drop=True)
     return (sum([series[i] <= series[i+1] for i in range(len(series)-1)])/(len(series)-1) >= 0.8) & all([sub_series[i] <= sub_series[i+1] for i in range(len(sub_series)-1)])
@@ -45,14 +46,16 @@ def execute(symbol):
     df_techanalysis_data = get_tech_analysis_data(symbol)
     # Implement Upper Trend Analysis in every week as the index is daily data
     bln_upper_trend_increasing, total_incured_percent, df_techanalysis_data = get_upper_trend(df_techanalysis_data)
+    df_income_data = sc.get_income_statement_data('AMZN')
+    bln_income_increasing_trend = is_stock_increasing_trend(df_income_data['totalRevenue'])
     print("Symbol: " + symbol)
     print("Positive Surprise: " + str(bln_positive_surprise))
     print("Upper Trend Increasing: " + str(bln_upper_trend_increasing))
     print("Total Incured Percent: " + str(round(total_incured_percent*100)) + "%")
     print("Before 100 Days Price: " + str(df_techanalysis_data.head(1)['open'].values[0]))
     print("Now Price: " + str(df_techanalysis_data.tail(1)['open'].values[0]))
+    print("Income Increasing Trend: " + str(bln_income_increasing_trend))
     print("successfully executed ...  ")
 
 if __name__ == "__main__":
-    df_income_data = sc.get_income_statement_data('AMZN')
     execute('AMZN')

@@ -49,4 +49,6 @@ def get_income_statement_data(symbol):
     response = rq.get(url, params={"function": function, "symbol": stock, "apikey": apikey})
     data = response.json()
     df = pd.DataFrame.from_dict(data['quarterlyReports'])
+    df.index = pd.to_datetime(df['fiscalDateEnding'])
+    df.sort_index(ascending=True, inplace=True)
     return df
