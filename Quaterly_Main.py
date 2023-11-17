@@ -54,4 +54,5 @@ def execute(symbol):
     print("successfully executed ...  ")
 
 if __name__ == "__main__":
-    execute('TSLA')
+    df_income_data = sc.get_income_statement_data('AMZN')
+    execute('AMZN')
