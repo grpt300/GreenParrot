@@ -130,3 +130,21 @@ if __name__ == "__main__":
     else:
         print("RSSO authentication failed. Exiting...")
 
+=====
+
+import requests
+from requests.auth import HTTPBasicAuth
+
+def check_health(url, username, password):
+    try:
+        response = requests.get(url, auth=HTTPBasicAuth(username, password))
+        if response.status_code == 200:
+            print("Application is healthy")
+        else:
+            print(f"Health check failed with status code: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    # Replace 'http://example.com' with your application URL
+    check_health('http://example.com', 'your_username', 'your_password')
